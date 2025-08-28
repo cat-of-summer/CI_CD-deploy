@@ -28,23 +28,23 @@ jobs:
         if: ${{ env.DEPLOY_METHOD == 'FTP' }}
         shell: bash
         run: |
-          sudo apt-get update && sudo apt-get install -y lftp
+          sudo apt-get install -y lftp
 
           DELETE=""
           if [ "${DEPLOY_MIRROR}" = "true" ]; then
             DELETE="--delete"
           fi
 
-          lftp -u "${{ env.DEPLOY_USER }},${{ env.DEPLOY_KEY }}" ${{ env.DEPLOY_HOST }} <<EOF
-          mirror -R \
-            --parallel=4 \
-            --verbose \
-            ${DELETE} \
-            --exclude-glob .git* \
-            ${{ env.DEPLOY_LOCAL_DIR }} \
-            ${{ env.DEPLOY_PATH }}
-          quit
-          EOF
+          lftp -u "$DEPLOY_USER,$DEPLOY_KEY" "$DEPLOY_HOST" -e "
+            mirror -R \
+              --parallel=4 \
+              --verbose \
+              $DELETE \
+              --exclude-glob .git* \
+              $DEPLOY_LOCAL_DIR \
+              $DEPLOY_PATH ;
+            quit
+          "
 
       - name: RSYNC DEPLOY
         if: ${{ env.DEPLOY_METHOD == 'RSYNC' }}
