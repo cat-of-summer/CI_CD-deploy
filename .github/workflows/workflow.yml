@@ -9,34 +9,26 @@ on:
 jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
-
-    # Матрица окружений
     strategy:
-      max-parallel: 1
       matrix:
         include:
           - environment: dev
             branch: main
           - environment: prod
-            branch: prod
+            branch: develop
 
-    # Job выполняется только если текущая ветка совпадает с веткой матрицы
-    if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
-
-    # Подключаем Environment из матрицы
     environment: ${{ matrix.environment }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Prepare workspace
+      - name: Skip if branch doesn't match
         shell: bash
         run: |
-          # Копируем все файлы кроме ненужных
-          rsync -av --exclude='.git' --exclude='node_modules' ./ .workspace/
-          echo "Workspace ready. Files:"
-          ls -la .workspace
+          if [ "${GITHUB_REF##refs/heads/}" != "${{ matrix.branch }}" ]; then
+            echo "Branch '${GITHUB_REF##refs/heads/}' does not match '${{ matrix.branch }}', skipping..."
+            exit 0
+          fi
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.4.0
@@ -46,8 +38,4 @@ jobs:
           password: ${{ secrets.DEPLOY_KEY }}
           local-dir: .workspace/
           server-dir: ${{ secrets.DEPLOY_PATH }}
-          mirror: false    # не затираем файлы на сервере
-          log-level: info
-
-      - name: Done
-        run: echo "Deployment finished for ${{ matrix.environment }} on branch ${{ matrix.branch }}"
+          mirror: false
