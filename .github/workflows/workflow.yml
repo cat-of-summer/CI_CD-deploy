@@ -1,0 +1,105 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, dev]
+
+env:
+  DEPLOY_METHOD: sftp
+  BUILD_DIR: .
+  DIST_DIR: ./dist/
+  BUILD_CMD: npm run build
+  GIT_DEPLOY_METHOD: DeployKey
+
+jobs:
+  ci_cd:
+    name: Build and Deploy (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        include:
+          - environment: dev
+            branch: develop
+            project_type: JS
+            secret_suffix: DEV
+            deploy_method: ${{ env.DEPLOY_METHOD }}
+            deploy_host: ${{ secrets.DEPLOY_HOST_DEV }}
+            deploy_user: ${{ secrets.DEPLOY_USER_DEV }}
+            deploy_path: /var/www/dev-project
+          - environment: prod
+            branch: main
+            project_type: JS
+            secret_suffix: PROD
+            deploy_method: ${{ env.DEPLOY_METHOD }}
+            deploy_host: ${{ secrets.DEPLOY_HOST_PROD }}
+            deploy_user: ${{ secrets.DEPLOY_USER_PROD }}
+            deploy_path: /var/www/prod-project
+    steps:
+      - name: Проверить нужную ветку
+        if: github.ref == 'refs/heads/${{ matrix.branch }}'
+
+      - name: Установка переменных и проверка
+        run: |
+          if [ -z "${{ matrix.deploy_host }}" ] || [ -z "${{ matrix.deploy_user }}" ]; then
+            echo "ERROR: deploy_host or deploy_user is not set"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v3
+
+      - name: Сборка (npm)
+        if: matrix.project_type != 'PHP'
+        run: |
+          echo "Building project..."
+          npm ci
+          ${{ env.BUILD_CMD }}
+
+      - name: Подключение SSH (тест)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ matrix.deploy_host }}
+          username: ${{ matrix.deploy_user }}
+          key: ${{ secrets['DEPLOY_KEY_' + matrix.secret_suffix] }}
+          script: echo "SSH connection OK"
+
+      - name: Деплой файлов
+        if: matrix.deploy_method == 'sftp'
+        uses: pressidium/lftp-mirror-action@v1
+        with:
+          host: ${{ matrix.deploy_host }}
+          user: ${{ matrix.deploy_user }}
+          pass: ${{ secrets['DEPLOY_KEY_' + matrix.secret_suffix] }}
+          localDir: ${{ env.DIST_DIR }}
+          remoteDir: ${{ matrix.deploy_path }}
+          onlyNewer: true
+      - name: Деплой файлов (FTP)
+        if: matrix.deploy_method == 'ftp'
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ matrix.deploy_host }}
+          username: ${{ matrix.deploy_user }}
+          password: ${{ secrets['DEPLOY_KEY_' + matrix.secret_suffix] }}
+          local-dir: ${{ env.DIST_DIR }}
+          server-dir: ${{ matrix.deploy_path }}
+      - name: Деплой файлов (rsync)
+        if: matrix.deploy_method == 'rsync'
+        uses: burnett01/rsync-deployments@7
+        with:
+          switches: -avzr --delete
+          path: ${{ env.BUILD_DIR }}
+          remote_path: ${{ matrix.deploy_path }}
+          remote_host: ${{ matrix.deploy_host }}
+          remote_user: ${{ matrix.deploy_user }}
+          remote_key: ${{ secrets['DEPLOY_KEY_' + matrix.secret_suffix] }}
+      - name: Обновление (git pull)
+        if: matrix.deploy_method == 'git'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ matrix.deploy_host }}
+          username: ${{ matrix.deploy_user }}
+          key: ${{ secrets['DEPLOY_KEY_' + matrix.secret_suffix] }}
+          script: |
+            cd ${{ matrix.deploy_path }}
+            git pull
+
