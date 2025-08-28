@@ -21,7 +21,7 @@ jobs:
             branch: prod
 
     # Job выполняется только если текущая ветка совпадает с веткой матрицы
-    if: github.ref == 'refs/heads/' + matrix.branch
+    if: ${{ github.ref == format('refs/heads/{0}', matrix.branch) }}
 
     # Подключаем Environment из матрицы
     environment: ${{ matrix.environment }}
