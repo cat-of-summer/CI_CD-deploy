@@ -29,14 +29,18 @@ jobs:
         if: ${{ env.BUILD_COMMAND != '' }}
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
           npm ci
+          
           $BUILD_COMMAND
           
       - name: FTP DEPLOY
         if: ${{ env.DEPLOY_METHOD == 'FTP' }}
         shell: bash
         run: |
+          set -euo pipefail
+
           sudo apt-get install -y lftp
 
           DELETE=""
@@ -60,6 +64,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          DELETE=""
+          if [ "${DEPLOY_MIRROR}" = "true" ]; then
+            DELETE="--delete"
+          fi
 
           TMP_KEY=$(mktemp)
           echo "$DEPLOY_KEY" > "$TMP_KEY"
