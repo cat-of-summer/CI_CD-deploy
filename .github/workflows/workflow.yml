@@ -36,6 +36,9 @@ jobs:
           server: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           password: ${{ secrets.DEPLOY_KEY }}
-          local-dir: .workspace/
+          local-dir: ./
           server-dir: ${{ secrets.DEPLOY_PATH }}
-          mirror: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
