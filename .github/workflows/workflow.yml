@@ -1,35 +1,20 @@
-# .github/workflows/ftp-matrix.yml
-name: FTP Deploy (Matrix + Environment)
+name: FTP Deploy
 
 on:
   push:
     branches:
-      - '*'
+      - '*'  # любые ветки, чтобы поймать все
 
 jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - environment: dev
-            branch: main
-          - environment: prod
-            branch: develop
 
-    environment: ${{ matrix.environment }}
+    # Environment автоматически берём из имени ветки
+    environment: ${{ github.ref_name }}
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Skip if branch doesn't match
-        shell: bash
-        run: |
-          if [ "${GITHUB_REF##refs/heads/}" != "${{ matrix.branch }}" ]; then
-            echo "Branch '${GITHUB_REF##refs/heads/}' does not match '${{ matrix.branch }}', skipping..."
-            exit 0
-          fi
-
+      
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
