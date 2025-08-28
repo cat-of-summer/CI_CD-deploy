@@ -26,17 +26,25 @@ jobs:
 
       - name: FTP DEPLOY
         if: ${{ env.DEPLOY_METHOD == 'FTP' }}
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ env.DEPLOY_HOST }}
-          username: ${{ env.DEPLOY_USER }}
-          password: ${{ env.DEPLOY_KEY }}
-          local-dir: ${{ env.DEPLOY_LOCAL_DIR }}
-          mirror: ${{ env.DEPLOY_MIRROR }}
-          server-dir: ${{ env.DEPLOY_PATH }}
-          exclude: |
-            **/.git*
-            **/.git*/**
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y lftp
+
+          DELETE=""
+          if [ "${DEPLOY_MIRROR}" = "true" ]; then
+            DELETE="--delete"
+          fi
+
+          lftp -u "${{ env.DEPLOY_USER }},${{ env.DEPLOY_KEY }}" ${{ env.DEPLOY_HOST }} <<EOF
+          mirror -R \
+            --parallel=4 \
+            --verbose \
+            ${DELETE} \
+            --exclude-glob .git* \
+            ${{ env.DEPLOY_LOCAL_DIR }} \
+            ${{ env.DEPLOY_PATH }}
+          quit
+          EOF
 
       - name: RSYNC DEPLOY
         if: ${{ env.DEPLOY_METHOD == 'RSYNC' }}
@@ -47,12 +55,12 @@ jobs:
           echo "$DEPLOY_KEY" > key.pem
           chmod 600 key.pem
 
-          RSYNC_DELETE=""
+          DELETE=""
           if [ "${DEPLOY_MIRROR}" = "true" ]; then
-            RSYNC_DELETE="--delete"
+            DELETE="--delete"
           fi
 
-          rsync -az --progress $RSYNC_DELETE \
+          rsync -az --progress $DELETE \
             -e "ssh -i key.pem -o StrictHostKeyChecking=no -p $DEPLOY_PORT" \
             "$DEPLOY_LOCAL_DIR/" "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
 
