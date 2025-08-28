@@ -61,19 +61,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "$DEPLOY_KEY" > key.pem
-          chmod 600 key.pem
-
-          DELETE=""
-          if [ "${DEPLOY_MIRROR}" = "true" ]; then
-            DELETE="--delete"
-          fi
+          TMP_KEY=$(mktemp)
+          echo "$DEPLOY_KEY" > "$TMP_KEY"
+          chmod 600 "$TMP_KEY"
 
           rsync -az --progress $DELETE \
-            -e "ssh -i key.pem -o StrictHostKeyChecking=no -p $DEPLOY_PORT" \
+            -e "ssh -i $TMP_KEY -o StrictHostKeyChecking=no -p $DEPLOY_PORT" \
+            --exclude='.*' \
             "$DEPLOY_LOCAL_DIR/" "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
 
-          rm -f key.pem
+          rm -f "$TMP_KEY"
 
       - name: GIT DEPLOY
         if: ${{ env.DEPLOY_METHOD == 'GIT' }}
@@ -83,10 +80,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "$DEPLOY_KEY" > key.pem
-          chmod 600 key.pem
+          TMP_KEY=$(mktemp)
+          echo "$DEPLOY_KEY" > "$TMP_KEY"
+          chmod 600 "$TMP_KEY"
 
-          ssh -i key.pem -o StrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST "
+          ssh -i $TMP_KEY -o StrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST "
             cd $DEPLOY_PATH
             if [ ! -d '.git' ]; then
               git clone git@github.com:${GITHUB_REPOSITORY}.git .
@@ -96,4 +94,4 @@ jobs:
             fi
           "
           
-          rm -f key.pem
+          rm -f "$TMP_KEY"
