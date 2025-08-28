@@ -1,15 +1,14 @@
-name: FTP Deploy
+name: CI/CD
 
 on:
   push:
     branches:
-      - '*'  # любые ветки, чтобы поймать все
+      - '&'
 
 jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
 
-    # Environment автоматически берём из имени ветки 
     environment: ${{ github.ref_name }}
 
     env:
@@ -20,11 +19,13 @@ jobs:
       DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
       DEPLOY_MIRROR: ${{ vars.DEPLOY_MIRROR || 'true' }}
       DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+      DEPLOY_METHOD: ${{ vars.DEPLOY_METHOD || 'NULL' }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via FTP
+      - name: FTP DEPLOY
+        if: ${{ env.DEPLOY_METHOD == 'FTP' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ env.DEPLOY_HOST }}
@@ -36,3 +37,23 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
+
+      - name: RSYNC DEPLOY
+        if: ${{ env.DEPLOY_METHOD == 'RSYNC' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "$DEPLOY_KEY" > key.pem
+          chmod 600 key.pem
+
+          RSYNC_DELETE=""
+          if [ "${DEPLOY_MIRROR}" = "true" ]; then
+            RSYNC_DELETE="--delete"
+          fi
+
+          rsync -az --progress $RSYNC_DELETE \
+            -e "ssh -i key.pem -o StrictHostKeyChecking=no -p $DEPLOY_PORT" \
+            "$DEPLOY_LOCAL_DIR/" "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
+
+          rm -f key.pem
