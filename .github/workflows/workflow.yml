@@ -1,4 +1,4 @@
-name: CI-CD
+name: workflow
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - '*'
 
 jobs:
-  CI-CD:
+  ci-cd:
     runs-on: ubuntu-latest
 
     environment: ${{ github.ref_name }}
