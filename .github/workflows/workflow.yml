@@ -21,9 +21,9 @@ jobs:
           server: ${{ vars.DEPLOY_HOST }}
           username: ${{ vars.DEPLOY_USER }}
           password: ${{ secrets.DEPLOY_KEY }}
-          local-dir: ./
+          local-dir: ${{ vars.DEPLOY_LOCAL_DIR || './' }}
+          mirror: ${{ vars.DEPLOY_MIRROR || 'true' }}
           server-dir: ${{ vars.DEPLOY_PATH }}
           exclude: |
             **/.git*
             **/.git*/**
-            **/node_modules/**
