@@ -18,11 +18,11 @@ jobs:
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
+          server: ${{ vars.DEPLOY_HOST }}
+          username: ${{ vars.DEPLOY_USER }}
           password: ${{ secrets.DEPLOY_KEY }}
           local-dir: ./
-          server-dir: ${{ secrets.DEPLOY_PATH }}
+          server-dir: ${{ vars.DEPLOY_PATH }}
           exclude: |
             **/.git*
             **/.git*/**
