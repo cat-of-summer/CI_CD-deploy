@@ -37,6 +37,7 @@ env:
 
 jobs:
   ci_cd:
+    environment: 
     name: Build & Deploy (${{ matrix.environment }})
     runs-on: ubuntu-latest
 
