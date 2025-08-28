@@ -4,7 +4,7 @@ name: FTP Deploy (Matrix + Environment)
 on:
   push:
     branches:
-      - 'main'
+      - '*'
 
 jobs:
   ftp-deploy:
