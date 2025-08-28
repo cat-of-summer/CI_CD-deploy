@@ -19,11 +19,20 @@ jobs:
       DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
       DEPLOY_MIRROR: ${{ vars.DEPLOY_MIRROR || 'true' }}
       DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
-      DEPLOY_METHOD: ${{ vars.DEPLOY_METHOD || 'NULL' }}
+      DEPLOY_METHOD: ${{ vars.DEPLOY_METHOD }}
+      BUILD_COMMAND: ${{ vars.BUILD_COMMAND }}
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: BUILD
+        if: ${{ env.BUILD_COMMAND != '' }}
+        shell: bash
+        run: |
+          set -e
+          npm ci
+          $BUILD_COMMAND
+          
       - name: FTP DEPLOY
         if: ${{ env.DEPLOY_METHOD == 'FTP' }}
         shell: bash
@@ -64,4 +73,27 @@ jobs:
             -e "ssh -i key.pem -o StrictHostKeyChecking=no -p $DEPLOY_PORT" \
             "$DEPLOY_LOCAL_DIR/" "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
 
+          rm -f key.pem
+
+      - name: GIT DEPLOY
+        if: ${{ env.DEPLOY_METHOD == 'GIT' }}
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "$DEPLOY_KEY" > key.pem
+          chmod 600 key.pem
+
+          ssh -i key.pem -o StrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST "
+            cd $DEPLOY_PATH
+            if [ ! -d '.git' ]; then
+              git clone git@github.com:${GITHUB_REPOSITORY}.git .
+            else
+              git fetch git@github.com:${GITHUB_REPOSITORY}.git ${GITHUB_REF_NAME}
+              git reset --hard FETCH_HEAD
+            fi
+          "
+          
           rm -f key.pem
