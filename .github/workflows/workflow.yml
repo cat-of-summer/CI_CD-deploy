@@ -9,7 +9,7 @@ jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
 
-    # Environment автоматически берём из имени ветки 
+    # Environment автоматически берём из имени ветки
     environment: ${{ github.ref_name }}
 
     steps:
