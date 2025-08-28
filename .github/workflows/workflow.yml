@@ -40,7 +40,8 @@ jobs:
               --parallel=4 \
               --verbose \
               $DELETE \
-              --exclude-glob .git* \
+              --exclude-glob '/.*' \
+              --exclude-glob '*/.*' \
               $DEPLOY_LOCAL_DIR \
               $DEPLOY_PATH ;
             quit
