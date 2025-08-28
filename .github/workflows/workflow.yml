@@ -12,18 +12,27 @@ jobs:
     # Environment автоматически берём из имени ветки 
     environment: ${{ github.ref_name }}
 
+    env:
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      DEPLOY_LOCAL_DIR: ${{ vars.DEPLOY_LOCAL_DIR || './' }}
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      DEPLOY_MIRROR: ${{ vars.DEPLOY_MIRROR || 'true' }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ vars.DEPLOY_HOST }}
-          username: ${{ vars.DEPLOY_USER }}
-          password: ${{ secrets.DEPLOY_KEY }}
-          local-dir: ${{ vars.DEPLOY_LOCAL_DIR || './' }}
-          mirror: ${{ vars.DEPLOY_MIRROR || 'true' }}
-          server-dir: ${{ vars.DEPLOY_PATH }}
+          server: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          password: ${{ env.DEPLOY_KEY }}
+          local-dir: ${{ env.DEPLOY_LOCAL_DIR }}
+          mirror: ${{ env.DEPLOY_MIRROR }}
+          server-dir: ${{ env.DEPLOY_PATH }}
           exclude: |
             **/.git*
             **/.git*/**

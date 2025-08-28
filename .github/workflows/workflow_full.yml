@@ -5,8 +5,7 @@ name: Universal CI/CD (dev/prod)
 on:
   push:
     branches:
-      - main
-      - develop
+      - never
   workflow_dispatch:
     inputs:
       project_type:
