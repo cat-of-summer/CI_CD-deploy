@@ -9,12 +9,12 @@ jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
 
-    # Environment автоматически берём из имени ветки
+    # Environment автоматически берём из имени ветки 
     environment: ${{ github.ref_name }}
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
