@@ -1,0 +1,171 @@
+# Professional .gitignore for WordPress
+# Scenario: DO NOT track core, DO NOT track plugins, track themes and project source only.
+
+# ------------------------
+# OS / Editors / Tools
+# ------------------------
+# macOS
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Editors / IDEs (put per-developer rules in global gitignore if desired)
+.idea/
+.vscode/
+nbproject/
+*.sublime-*
+*.swp
+*~
+
+# ------------------------
+# Misc system / VCS / other
+# ------------------------
+.hg/
+.svn/
+CVS/
+Thumbs.db
+
+# ------------------------
+# Host/platform generated files
+# ------------------------
+_wpeprivate
+.smushit-status
+.local-lightning.log
+
+# ------------------------
+# Node / build / caches
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.cache/
+.cache-loader/
+
+# ------------------------
+# PHP / Composer / vendor
+# ------------------------
+vendor/
+# If you manage dependencies with Composer in CI, commit composer.json/composer.lock only
+composer.lock
+composer.phar
+
+# ------------------------
+# Environment / logs / local secrets
+# ------------------------
+.env
+.env.local
+.env.*.local
+*.log
+wp-content/debug.log
+phpunit.xml
+phpunit.xml.dist
+
+# ------------------------
+# Database / backups / large files
+# ------------------------
+*.sql
+*.sql.gz
+backup_*/
+*.sql.bz2
+*.dump
+
+# Large binary / media files (keep them out of git)
+*.psd
+*.ai
+*.psb
+*.sketch
+*.mov
+*.mp4
+*.avi
+*.mkv
+*.iso
+
+# ------------------------
+# Misc & archives
+# ------------------------
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.enc
+*.enc*
+
+# Office / media docs
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.pdf
+*.rtf
+
+# ------------------------
+# WordPress dynamic data (do NOT track)
+# ------------------------
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/backups/
+/wp-content/cache/
+/wp-content/object-cache.php
+/wp-content/advanced-cache.php
+
+# ------------------------
+# Policy for wp-content:
+# - Ignore everything inside wp-content by default
+# - Explicitly allow themes (track all themes or choose specific)
+# - Explicitly ignore plugins (we DO NOT track plugins)
+# - Optionally allow mu-plugins if you keep must-use custom code in repo
+# ------------------------
+/wp-content/*
+# keep theme(s)
+!/wp-content/themes/
+!/wp-content/themes/**
+
+# do NOT track plugins
+/wp-content/plugins/
+# (redundant but explicit)
+!/wp-content/plugins/index.php
+
+# optional: track must-use plugins (uncomment if you want them in repo)
+# !/wp-content/mu-plugins/
+# !/wp-content/mu-plugins/**
+
+# ignore caches and build artifacts inside themes if present
+/wp-content/themes/*/node_modules/
+/wp-content/themes/*/vendor/
+
+# if specific theme build outputs must be ignored, add them per-theme, e.g.:
+# /wp-content/themes/your-theme/dist/
+# /wp-content/themes/your-theme/.cache/
+
+# ------------------------
+# WordPress core — DO NOT track
+# ------------------------
+/wp-admin/
+/wp-includes/
+/wp-login.php
+/wp-cron.php
+/xmlrpc.php
+/wp-*.php
+
+# ------------------------
+# Keep useful root files tracked (configuration templates, deploy hooks)
+# ------------------------
+!.htaccess
+!robots.txt
+!wp-config-sample.php
+# If you want to track wp-config.php (not recommended), uncomment:
+# !wp-config.php
+
+# WP Engine and similar host files (ignore)
+.wpe-backup
+
+# End of file

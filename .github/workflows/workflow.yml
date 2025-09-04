@@ -105,10 +105,14 @@ jobs:
           ssh -i $TMP_KEY -o StrictHostKeyChecking=no -p $DEPLOY_PORT $DEPLOY_USER@$DEPLOY_HOST "
             cd $DEPLOY_PATH
             if [ ! -d '.git' ]; then
-              git clone git@github.com:${GITHUB_REPOSITORY}.git .
+              git clone --branch ${GITHUB_REF_NAME} git@github.com:${GITHUB_REPOSITORY}.git .
             else
-              git fetch git@github.com:${GITHUB_REPOSITORY}.git ${GITHUB_REF_NAME}
-              git reset --hard FETCH_HEAD
+              if [ "${DEPLOY_MIRROR}" = "true" ]; then
+                git fetch origin ${GITHUB_REF_NAME}
+                git reset --hard origin/${GITHUB_REF_NAME}
+              else
+                git pull origin ${GITHUB_REF_NAME}
+              fi
             fi
           "
           

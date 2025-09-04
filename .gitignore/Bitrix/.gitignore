@@ -1,0 +1,190 @@
+# Professional .gitignore for Bitrix projects
+# Scenario: DO NOT track Bitrix core; track only project sources (local/, templates, build sources)
+
+# ------------------------
+# OS / Editors / Tools
+# ------------------------
+# macOS
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Editors / IDEs (put per-developer rules in global gitignore if desired)
+.idea/
+.vscode/
+nbproject/
+*.sublime-*
+*.swp
+*~
+
+# ------------------------
+# Misc system / VCS / other
+# ------------------------
+.hg/
+.svn/
+CVS/
+Thumbs.db
+
+# ------------------------
+# Host/platform generated files
+# ------------------------
+_wpeprivate
+.smushit-status
+.local-lightning.log
+
+# ------------------------
+# Node / build / caches
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.cache/
+.cache-loader/
+
+# ------------------------
+# PHP / Composer / vendor
+# ------------------------
+vendor/
+# If you manage dependencies with Composer in CI, commit composer.json/composer.lock only
+composer.lock
+composer.phar
+
+# ------------------------
+# Environment / logs / local secrets
+# ------------------------
+.env
+.env.local
+.env.*.local
+*.log
+wp-content/debug.log
+phpunit.xml
+phpunit.xml.dist
+
+# ------------------------
+# Database / backups / large files
+# ------------------------
+*.sql
+*.sql.gz
+backup_*/
+*.sql.bz2
+*.dump
+
+# Large binary / media files (keep them out of git)
+*.psd
+*.ai
+*.psb
+*.sketch
+*.mov
+*.mp4
+*.avi
+*.mkv
+*.iso
+
+# ------------------------
+# Misc & archives
+# ------------------------
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.enc
+*.enc*
+
+# Office / media docs
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.pdf
+*.rtf
+
+# ------------------------
+# Bitrix dynamic/cache/uploads (DO NOT track core/runtime)
+# ------------------------
+/upload/
+/upload/*
+/bitrix/backup/
+/bitrix/cache/
+/bitrix/managed_cache/
+/bitrix/stack_cache/
+/bitrix/updates/
+/bitrix/modules/
+/bitrix/cache_all/
+/bitrix/tmp/
+/bitrix/backup_db/
+/bitrix/backup*/
+/bitrix/stack_cache/
+/bitrix/managed_cache/*
+
+# Files which often contain runtime caches / should not be tracked
+/bitrix/php_interface/after_connect*
+/bitrix/php_interface/dbconn*
+/local/php_interface/after_connect*
+/local/php_interface/dbconn*
+
+# ------------------------
+# Project structure policy
+# ------------------------
+# Ignore the whole bitrix core directory by default (we don't store core)
+# If you have custom code under bitrix/* that must be versioned,
+# move it to /local/ or explicitly unignore specific paths.
+ /bitrix/
+
+# Track local/ (recommended place for custom code) — keep everything in /local
+!/local/
+!/local/**
+
+# If you still have custom components in bitrix/components/, consider moving them to local/components/.
+# If you MUST keep some files inside /bitrix/, explicitly unignore them here (example commented):
+# !/bitrix/my_custom_dir/
+# !/bitrix/components/my_vendor/my_component/
+
+# ------------------------
+# Templates and themes
+# ------------------------
+# Track site templates in local or bitrix/templates if you use that approach.
+!/local/templates/
+!/local/templates/**
+# If you keep templates in bitrix/templates (not recommended with modern projects), unignore specific templates:
+# !/bitrix/templates/my_site_template/
+# !/bitrix/templates/my_site_template/**
+
+# ------------------------
+# Exclude uploader files & temp assets inside templates/themes
+# ------------------------
+/local/templates/*/node_modules/
+/local/templates/*/vendor/
+
+# ------------------------
+# Logs / profiling / host specific
+# ------------------------
+/local/logs/
+/var/log/
+/xhprof/
+/xhprof/*/logs/
+/xhprof/logs/
+
+# ------------------------
+# Keep sample/config templates (do NOT track real credentials)
+# ------------------------
+# Bitrix settings: keep sample files, ignore real settings
+!/bitrix/.settings.php.sample
+# Do NOT track actual settings with secrets
+/bitrix/.settings.php
+/bitrix/.settings_extra.php
+/local/.settings.php
+/local/.settings_extra.php
+
+# If you need to track any specific file inside /bitrix/, explicitly unignore it here:
+# Example: !/bitrix/some_custom/important_file.php
+
+# End of file
